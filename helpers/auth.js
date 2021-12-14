@@ -271,7 +271,7 @@ async function validateToken(ctx, token) {
 		decoded = rollingJWTVerify(token);
 		return decoded;
 	} catch (error) {
-		if ((error.name !== 'TokenExpiredError') && !((error.name === 'JsonWebTokenError') && (error.message === 'invalid signature'))) {
+		if ((error.name !== 'TokenExpiredError') && (error.name !== 'TokenInvalidated') && !((error.name === 'JsonWebTokenError') && (error.message === 'invalid signature'))) {
 			throw error;
 		}
 

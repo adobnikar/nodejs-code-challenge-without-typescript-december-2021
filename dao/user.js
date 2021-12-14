@@ -51,6 +51,20 @@ function setDefaultUserData(data) {
 }
 
 /**
+ * Get user details.
+ *
+ * @param {KoaContext} ctx
+ * @param {integer} [userId]
+ */
+ async function show(ctx, userId) {
+	let user = await User.where('id', userId).first();
+	ctx.assert(user, 400, `User with id ${userId} not found.`);
+	user = user.toJSON();
+	formatUser(user, ctx);
+	return user;
+}
+
+/**
  * Create a new user.
  *
  * @param {KoaContext} ctx
@@ -76,9 +90,63 @@ function setDefaultUserData(data) {
 store = LockHelper.lockify(store, 'cuUser');
 
 /**
+ * Update an existing user.
+ *
+ * @param {KoaContext} ctx
+ * @param {integer} id User id.
+ * @param {object} data User's data.
+ */
+ async function update(ctx, id, data) {
+	// Only admin can edit other users.
+	let user = await User.select(['id', 'role']).where('id', id).first();
+	ctx.assert(user, 400, `User with id ${id} not found.`);
+	user = user.toJSON();
+	let isMe = (user.id === get(ctx, 'state.user.id', null));
+	let ctxRole = get(ctx, 'state.user.role', null);
+	let ctxIsAdmin = (ctxRole === 'admin');
+
+	// Check if the logged in user can edit this user.
+	if (!isMe && !ctxIsAdmin) {
+		ctx.throw(400, 'You don\'t have the permission to edit this user.');
+	}
+
+	// Check if the role can be changed.
+	let newRole = null;
+	if (ctxIsAdmin) {
+		newRole = data.role;
+	} else if (data.role != null) {
+		ctx.throw(400, `Only admins have the permission to change other user's role.`);
+	}
+
+	// Update the user.
+	user = new User({ id: id });
+	if (data.password != null) user.set('password', await bcrypt.hash(data.password, 10));
+	if (data.first_name != null) user.set('first_name', data.first_name);
+	if (data.last_name != null) user.set('last_name', data.last_name);
+	if (newRole != null) user.set('role', newRole);
+
+	// Save the changes.
+	if (Object.keys(user.changed).length > 0) {
+		await user.save();
+	}
+
+	// If user's role was changed then we need to invalidate the JWT access token.
+	if (newRole != null) {
+		AuthTokenInvalidateHelper.invalidateUser(id);
+	}
+
+	user = user.toJSON();
+	formatUser(user, ctx);
+	return user;
+}
+update = LockHelper.lockify(update, 'cuUser');
+
+/**
  * Exported functions.
  * @type {Object}
  */
  module.exports = {
+	show,
 	store,
+	update,
 };

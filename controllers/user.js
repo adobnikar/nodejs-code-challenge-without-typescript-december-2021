@@ -5,13 +5,14 @@ const User = require('../models/user');
 const AuthHelper = require('../helpers/auth');
 const PasswordHelper = require('../helpers/password');
 const UserDAO = require('../dao/user');
+const RoleDAO = require('../dao/role');
 const get = require('lodash.get');
 
 /**
  * Register a new user.
  *
  * @param {string} email Valid email address.
- * @param {string} password Password must pass the password strength check.
+ * @param {string} password Password must be a non-empty string. The password strength check is skipped intentionally.
  * @param {string} repeatPassword Repeated password must match the original password field.
  * @param {string} [first_name] User's first name.
  * @param {string} [last_name] User's last name.
@@ -25,11 +26,11 @@ const get = require('lodash.get');
 		last_name: Joi.string().trim().allow('').allow(null).default(null),
 	}));
 
-	let userInputs = [];
-	userInputs.push(body.email);
-	if (body.first_name != null) userInputs.push(body.first_name);
-	if (body.last_name != null) userInputs.push(body.last_name);
-	PasswordHelper.checkPasswordStrength(ctx, body.password, userInputs);
+	// let userInputs = [];
+	// userInputs.push(body.email);
+	// if (body.first_name != null) userInputs.push(body.first_name);
+	// if (body.last_name != null) userInputs.push(body.last_name);
+	// PasswordHelper.checkPasswordStrength(ctx, body.password, userInputs);
 
 	if (body.password !== body.repeatPassword) {
 		ctx.throw(400, 'Repeated password does not match.');
@@ -38,7 +39,6 @@ const get = require('lodash.get');
 	ctx.body = await UserDAO.store(ctx, {
 		email: body.email,
 		password: body.password,
-		role: 'user',
 		first_name: body.first_name,
 		last_name: body.last_name,
 	});
@@ -59,11 +59,10 @@ async function login(ctx, next) {
 	let user = await AuthHelper.checkUserCredentials(ctx, User.where('email', body.email), body.password); // Check credentials.
 	await AuthHelper.loginUser(ctx, user.id, true); // Login - create a new session.
 
-	ctx.response.headers['x-set-auth-token']
-
 	ctx.body = {
 		message: 'Login successful.',
 		token: get(ctx, "response.headers['x-set-auth-token']", 'Please check the "x-set-auth-token" header of the response.'),
+		user: await UserDAO.show(ctx, user.id),
 	};
 }
 
@@ -76,6 +75,26 @@ async function logout(ctx, next) {
 }
 
 /**
+ * Update a user.
+ *
+ * @param {integer} id User id.
+ * @param {string} [first_name] User's first name.
+ * @param {string} [last_name] User's last name.
+ * @param {string} [password] Password must be a non-empty string. The password strength check is skipped intentionally.
+ * @param {string} [role] Options are "user" and "admin".
+ */
+ async function update(ctx, next) {
+	let body = Joi.attempt(ctx.request.body, Joi.object().keys({
+		id: Joi.number().integer().required(),
+		first_name: Joi.string().trim().allow('').allow(null).default(null),
+		last_name: Joi.string().trim().allow('').allow(null).default(null),
+		password: Joi.string().allow(null).default(null),
+		role: Joi.string().valid(RoleDAO.index()).allow(null).default(null),
+	}));
+	ctx.body = await UserDAO.update(ctx, body.id, body);
+}
+
+/**
  * Exported functions.
  * @type {Object}
  */
@@ -83,4 +102,5 @@ module.exports = {
 	store,
 	login,
 	logout,
+	update,
 };

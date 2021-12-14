@@ -51,9 +51,9 @@ router.post('users.login', '/user/login', UserController.login);
 
 // Auth group. Any routes in this group need to pass the "AuthMiddleware.auth" middleware.
 router.group(['auth', 'user'], () => {
-	// Auth.
+	// User.
 	router.get('users.logout', '/user/logout', UserController.logout);
-
+	router.post('users.update', '/user/update', UserController.update);
 
 	// TODO: add user or invite token middleware
 	// router.group(['user'], () => {

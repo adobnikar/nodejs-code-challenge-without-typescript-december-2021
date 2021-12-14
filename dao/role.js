@@ -39,6 +39,7 @@ function resolveRoles(roles) {
 
 function formatRole(roles) {
 	if (roles == null) return null;
+	if (!isArray(roles)) roles = [roles];
 	let role = 'none';
 	if (roles.length > 0) {
 		if (isString(roles[0])) role = roles[0];

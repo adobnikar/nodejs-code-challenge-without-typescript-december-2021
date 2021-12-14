@@ -95,6 +95,19 @@ async function logout(ctx, next) {
 }
 
 /**
+ * Delete a user.
+ *
+ * @param {integer} id User id.
+ */
+ async function destroy(ctx, next) {
+	let body = Joi.attempt(ctx.request.body, Joi.object().keys({
+		id: Joi.number().integer().required(),
+	}));
+	await UserDAO.destroy(ctx, body.id);
+	ctx.body = { message: 'Account successfully deleted.' };
+}
+
+/**
  * Exported functions.
  * @type {Object}
  */
@@ -103,4 +116,5 @@ module.exports = {
 	login,
 	logout,
 	update,
+	destroy,
 };

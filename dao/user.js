@@ -142,6 +142,28 @@ store = LockHelper.lockify(store, 'cuUser');
 update = LockHelper.lockify(update, 'cuUser');
 
 /**
+ * Soft delete a user account.
+ *
+ * @param {KoaContext} ctx
+ * @param {integer} userId
+ */
+ async function destroy(ctx, userId) {
+	let user = await User.select(['id']).where('id', userId).first();
+	ctx.assert(user, 400, `User with id ${userId} not found.`);
+
+	let isMe = (user.id === get(ctx, 'state.user.id', null));
+	let ctxRole = get(ctx, 'state.user.role', null);
+	let ctxIsAdmin = (ctxRole === 'admin');
+
+	if (!isMe && !ctxIsAdmin) {
+		ctx.throw(400, 'You do not have the permission to delete this user.');
+	}
+
+	await User.where('id', userId).delete();
+	await AuthHelper.logout(ctx, userId);
+}
+
+/**
  * Exported functions.
  * @type {Object}
  */
@@ -149,4 +171,5 @@ update = LockHelper.lockify(update, 'cuUser');
 	show,
 	store,
 	update,
+	destroy,
 };

@@ -54,6 +54,7 @@ router.group(['auth', 'user'], () => {
 	// User.
 	router.get('users.logout', '/user/logout', UserController.logout);
 	router.post('users.update', '/user/update', UserController.update);
+	router.post('users.destroy', '/user/delete', UserController.destroy);
 
 	// TODO: add user or invite token middleware
 	// router.group(['user'], () => {

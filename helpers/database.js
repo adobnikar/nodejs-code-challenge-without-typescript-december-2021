@@ -14,6 +14,7 @@ async function waitForDatabase() {
 		try {
 			await knex.raw('SELECT \'Connection test.\';');
 			Log.success('DATABASE', 'Database connection established.');
+			knex.destroy();
 			return;
 		} catch (error) {
 			Log.info('DATABASE', 'Waiting for database connection ...');
@@ -40,6 +41,7 @@ async function createDatabase() {
 				Log.info('DATABASE', `Database "${database}" already exists.`);
 			}
 		}
+		knex.destroy();
 	} catch (error) {
 		Log.error('DATABASE', error.message);
 		Log.error('DATABASE', 'Exit.');
@@ -55,6 +57,7 @@ async function migrateLatest() {
 	} else {
 		Log.info('DATABASE', 'Migrations already up to date.');
 	}
+	knex.destroy();
 }
 
 module.exports = {

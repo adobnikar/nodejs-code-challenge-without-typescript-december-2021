@@ -67,6 +67,10 @@ router.group(['auth', 'user'], () => {
 	router.post('tools.calc', '/tools/:id', ToolController.calc);
 });
 
+function areWeTestingWithJest() {
+    return process.env.JEST_WORKER_ID !== undefined;
+}
+
 /**
  * Apply routes middleware function.
  *
@@ -77,20 +81,22 @@ async function applyUse(app) {
 	app.use(router.routes()).use(router.allowedMethods());
 
 	// API Explorer.
-	let explorer = new KoaApiExplorer({
-		routesFile: __filename,
-		controllerDir: './controllers',
-		docsDir: './docs',
-		routesExportDoc: true,
-		port: process.env.SERVER_PORT || 3000,
-		router: router,
-		version: '1.0.0',
-		title: 'Node.js Code Challenge ' + process.env.NODE_ENV_ALIAS,
-		description: 'Node.js Code Challenge.',
-		contactName: 'Info',
-		contactEmail: 'info@example.com',
-	});
-	app.use(explorer.apiExplorer());
+	if (!areWeTestingWithJest()) {
+		let explorer = new KoaApiExplorer({
+			routesFile: __filename,
+			controllerDir: './controllers',
+			docsDir: './docs',
+			routesExportDoc: true,
+			port: process.env.SERVER_PORT || 3000,
+			router: router,
+			version: '1.0.0',
+			title: 'Node.js Code Challenge ' + process.env.NODE_ENV_ALIAS,
+			description: 'Node.js Code Challenge.',
+			contactName: 'Info',
+			contactEmail: 'info@example.com',
+		});
+		app.use(explorer.apiExplorer());
+	}
 }
 
 module.exports = {

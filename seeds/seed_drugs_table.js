@@ -1,6 +1,7 @@
 'use strict';
 
 exports.seed = async function(knex) {
+	await knex('drugs').delete();
 	await knex('drugs').insert([
 		{
 			"slug": "aspirin",

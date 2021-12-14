@@ -17,6 +17,18 @@ const mwOptions = require('./middleware/options');
 const mwErrorHandler = require('./middleware/error-handler');
 const mwBaseUrl = require('./middleware/base-url');
 const routes = require('./routes');
+const Bookshelf = require('./bookshelf');
+const knex = Bookshelf.knex;
+
+// Create a Koa server instance.
+const app = new Koa();
+app.proxy = true;
+let serverStartedPromiseResolve = null;
+let serverStartedPromiseReject = null;
+app.serverStartedPromise = new Promise((resolve, reject) => {
+	serverStartedPromiseResolve = resolve;
+	serverStartedPromiseReject = reject;
+});
 
 // Async wrapper. Enable await calls.
 (async () => {
@@ -25,10 +37,6 @@ const routes = require('./routes');
 		await DatabaseHelper.createDatabase(); // Create database if it does not exists.
 		await DatabaseHelper.migrateLatest(); // Run latest database migrations.
 	}
-
-	// Create a Koa server instance.
-	const app = new Koa();
-	app.proxy = true;
 
 	// Error handler - If the error reaches the bottom of the stack.
 	app.on('error', (err) => {
@@ -39,10 +47,7 @@ const routes = require('./routes');
 	// Middleware.
 	app.use(mwLogger);
 	app.use(mwClickJacking);
-	if (process.env.NODE_ENV === 'development' ||
-		process.env.NODE_ENV === 'stage') {
-		app.use(mwCORS);
-	}
+	app.use(mwCORS);
 	app.use(mwOptions);
 	app.use(mwErrorHandler);
 	app.use(mwBaseUrl);
@@ -60,11 +65,22 @@ const routes = require('./routes');
 	if (server.address() === null) {
 		let errMsg = 'Error: Please select a different server port by configuring the ".env" file.';
 		Log.error(errMsg);
+		serverStartedPromiseReject(new Error(errMsg));
 		process.exit(1);
 	}
 	Log.success('Server: http://127.0.0.1:' + server.address().port);
+	serverStartedPromiseResolve();
+
+	app.closeServer = () => {
+		Log.info('Closing server.');
+		server.close();
+		knex.destroy();
+	};
 })().catch((err) => {
 	Log.error('Error: Server failed to start.');
 	Log.error(err);
+	serverStartedPromiseReject(err);
 	process.exit(1);
 });
+
+module.exports = app;

@@ -1,5 +1,6 @@
 'use strict';
 
+const { isArray } = require('lodash');
 const isString = require('lodash/isString');
 
 /**
@@ -24,6 +25,18 @@ function index() {
 	return ROLES;
 }
 
+function resolveRoles(roles) {
+	if (!isArray(roles)) roles = [roles];
+	let checkedRoles = [];
+	for (let role of roles) {
+		if (!dbRoleExists(role)) {
+			throw new Error(`Role "${role}" does not exist.`);
+		}
+		checkedRoles.push(role);
+	}
+	return checkedRoles;
+}
+
 function formatRole(roles) {
 	if (roles == null) return null;
 	let role = 'none';
@@ -37,5 +50,6 @@ function formatRole(roles) {
 module.exports = {
 	index,
 	dbRoleExists,
+	resolveRoles,
 	formatRole,
 };

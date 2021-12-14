@@ -17,13 +17,13 @@ async function middleware(ctx, next) {
 			case 'TokenExpiredError':
 				ctx.status = 401;
 				ctx.body = {
-					message: ctx.i18n.__('JWT token has expired.'),
+					message: 'JWT token has expired.',
 				};
 				break;
 			case 'JsonWebTokenError':
 				ctx.status = 401;
 				ctx.body = {
-					message: ctx.i18n.__('JWT token is invalid.'),
+					message: 'JWT token is invalid.',
 				};
 				break;
 			case 'ValidationError':
@@ -42,7 +42,7 @@ async function middleware(ctx, next) {
 					}
 				} else {
 					ctx.body = {
-						message: ctx.i18n.__('Input validation failed.'),
+						message: 'Input validation failed.',
 					};
 				}
 				break;
@@ -58,7 +58,7 @@ async function middleware(ctx, next) {
 						};
 					} else {
 						ctx.body = {
-							message: ctx.i18n.__('Something went wrong. Please try again.'),
+							message: 'Something went wrong. Please try again.',
 							error: err.message,
 							stack: err.stack,
 						};
@@ -75,14 +75,9 @@ async function middleware(ctx, next) {
 						message: err.message,
 					};
 				}
-				if (err.field != null) ctx.body.field = err.field;
 				break;
 		}
 	}
 }
 
-/**
- * Exported functions.
- * @type {Object}
- */
 module.exports = middleware;

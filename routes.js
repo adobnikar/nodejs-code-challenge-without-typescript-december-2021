@@ -45,27 +45,15 @@ router.pushMiddleware('body');
 // Health.
 router.get('health', '/health', HealthController.health);
 
-// // Auth.
-// router.post('auth.login.user', '/auth/login', AuthController.loginUser);
-// router.post('auth.login.api-key', '/auth/login/api-key', AuthController.loginApiKey);
-
-// // Password.
-// router.post('password-reset.email', '/password-reset/email', PasswordResetController.sendResetEmail);
-// router.post('password-reset.test', '/password-reset/test', PasswordResetController.testToken);
-// router.post('password-reset.reset', '/password-reset/reset', PasswordResetController.reset);
-
-// // Support email.
-// router.get('emails.show.support', '/emails/support', EmailController.showSupportEmail);
-
-// // User invites.
-// router.post('user-invite.test', '/user-invite/test', UserInviteController.testToken);
-// router.post('user-invite.user', '/user-invite/user', UserInviteController.showUser);
-// router.post('users.store.invite', '/users/invite', UserController.storeInvite);
+// User.
+router.post('users.store', '/user/register', UserController.store);
+router.post('users.login', '/user/login', UserController.login);
 
 // Auth group. Any routes in this group need to pass the "AuthMiddleware.auth" middleware.
-router.group('auth', () => {
+router.group(['auth', 'user'], () => {
 	// Auth.
-	router.get('auth.logout', '/auth/logout', UserController.logout);
+	router.get('users.logout', '/user/logout', UserController.logout);
+
 
 	// TODO: add user or invite token middleware
 	// router.group(['user'], () => {

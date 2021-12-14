@@ -11,34 +11,17 @@ const AuthHelper = require('../helpers/auth');
 async function auth(ctx, next) {
 	// Check if the auth token present and valid.
 	let token = await AuthHelper.getToken(ctx);
-	if (token == null) token = await AuthHelper.getApiKeyHeader(ctx);
-
-	// TODO: x-token - use for checking the invite token
 
 	// Check if the session is present.
 	if (token == null) {
-		ctx.throw(401, 'Not authorized. Please login or send an API key with the request.');
+		ctx.throw(401, 'Not authorized. Please login.');
 	}
 
 	try {
 		// Set the user or API key as authorized.
 		AuthHelper.setAuth(ctx, token);
 	} catch (err) {
-		ctx.throw(401, 'Not authorized. Please login or send an API key with the request.');
-	}
-
-	// Execute the route.
-	if (next != null) await next();
-}
-
-/**
- * Middleware that checks if logged in as user.
- */
-async function user(ctx, next) {
-	// Check if the user is logged in.
-	let userId = get(ctx, 'state.user.id', null);
-	if (userId == null) {
-		ctx.throw(403, 'Forbidden. This endpoint can only be accessed as a logged in user.');
+		ctx.throw(401, 'Not authorized. Please login.');
 	}
 
 	// Execute the route.
@@ -63,7 +46,7 @@ function roles(roleList) {
 			ctx.throw(403, 'Forbidden. This endpoint can only be accessed as a logged in user.');
 		}
 
-		// Check if user any of the roles in the list.
+		// Check if user has any of the roles on the list.
 		let user = ctx.state.user;
 		for (let roleName of roleList) {
 			if (!user.roles.has(roleName)) {
@@ -81,26 +64,10 @@ function roles(roleList) {
 }
 
 /**
- * Middleware that checks if logged in with API key.
- */
-async function apiKey(ctx, next) {
-	// Check if the user is logged in.
-	let apiKeyId = get(ctx, 'state.apiKey.id', null);
-	if (apiKeyId == null) {
-		ctx.throw(403, 'Forbidden. This endpoint can only be accessed with an API key.');
-	}
-
-	// Execute the route.
-	if (next != null) await next();
-}
-
-/**
  * Exported functions.
  * @type {Object}
  */
 module.exports = {
 	auth,
-	user,
 	roles,
-	apiKey,
 };

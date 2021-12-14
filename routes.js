@@ -11,6 +11,7 @@ const AuthMiddleware = require('./middleware/auth');
 // Require all exposed controllers.
 const HealthController = require('./controllers/health');
 const UserController = require('./controllers/user');
+const DrugController = require('./controllers/drug');
 
 // Create koa router instance.
 let router = new KoaRouter({
@@ -45,16 +46,21 @@ router.pushMiddleware('body');
 // Health.
 router.get('health', '/health', HealthController.health);
 
-// User.
+// Users.
 router.post('users.store', '/user/register', UserController.store);
 router.post('users.login', '/user/login', UserController.login);
 
 // Auth group. Any routes in this group need to pass the "AuthMiddleware.auth" middleware.
 router.group(['auth', 'user'], () => {
-	// User.
+	// Users.
 	router.get('users.logout', '/user/logout', UserController.logout);
 	router.post('users.update', '/user/update', UserController.update);
 	router.post('users.destroy', '/user/delete', UserController.destroy);
+
+	// Drugs.
+	router.get('drugs.index', '/drugs', DrugController.index);
+	router.get('drugs.show', '/drugs/:id(\\d+)', DrugController.show);
+	router.get('drugs.show.slug', '/drugs/slug/:slug', DrugController.showSlug);
 
 	// TODO: add user or invite token middleware
 	// router.group(['user'], () => {

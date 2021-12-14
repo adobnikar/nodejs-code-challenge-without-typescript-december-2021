@@ -1,5 +1,6 @@
 'use strict';
 
+const { get } = require('lodash');
 const Bookshelf = require('../bookshelf');
 
 module.exports = Bookshelf.model('Drug', {
@@ -18,6 +19,12 @@ module.exports = Bookshelf.model('Drug', {
 	 */
 
 	scopes: {
-		// TODO: implement canSee / csnView / canRead scope
+		canRead(q, ctx) {
+			let ctxRole = get(ctx, 'state.user.role', null);
+			let ctxIsAdmin = (ctxRole === 'admin');
+			if (!ctxIsAdmin) {
+				q.be.where('confirmed', true).where('published', true);
+			}
+		},
 	},
 });

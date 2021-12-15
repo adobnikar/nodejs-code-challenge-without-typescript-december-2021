@@ -46,6 +46,8 @@ Setup
 ```bash
 cp .env.example .env
 # Change the POSTGRES_PASSWORD in the .env file
+# Change the POSTGRES_HOST in the .env file to 127.0.0.1
+# Change the POSTGRES_PORT in the .env file to 25432
 ```
 
 Start only the database container
@@ -70,7 +72,7 @@ The launch commands are specified in the `.vscode/launch.json` file.
 
 Setup is the same as for the development.
 Only instead of launching the application, run the tests.
-Jest (https://jestjs.io/) framework is used for testing.
+Jest (https://jestjs.io/) and SuperTest (https://www.npmjs.com/package/supertest) frameworks are used for testing.
 Run the tests with the following command:
 
 ```bash
@@ -81,6 +83,8 @@ npm test
 
 Once you start the server you can find the API documentation at `http://127.0.0.1:[SERVER_PORT]/api-explorer`.
 Documentation is auto-generated from the JSDoc (https://jsdoc.app/) comments above the functions in the controllers.
+
+**NOTE**: To log in just run the POST `/user/login` API endpoint from the API explorer. Cookies will handle the rest!!!
 
 ## Database migrations
 

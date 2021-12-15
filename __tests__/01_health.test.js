@@ -21,3 +21,11 @@ test('404', async () => {
 	expect(response.body.message).toBeDefined();
     expect(response.body.message).toBe('Not Found');
 });
+
+test('404 API explorer', async () => {
+	// NOTE: API explorer should not be running in the test environment
+    const response = await request(app.callback()).get('/api-explorer');
+    expect(response.status).toBe(404);
+	expect(response.body.message).toBeDefined();
+    expect(response.body.message).toBe('Not Found');
+});

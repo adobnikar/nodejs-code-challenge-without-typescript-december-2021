@@ -19,6 +19,7 @@ const mwBaseUrl = require('./middleware/base-url');
 const routes = require('./routes');
 const Bookshelf = require('./bookshelf');
 const knex = Bookshelf.knex;
+const AuthTokenInvalidateHelper = require('./helpers/auth-token-invalidate');
 
 // Create a Koa server instance.
 const app = new Koa();
@@ -73,6 +74,7 @@ app.serverStartedPromise = new Promise((resolve, reject) => {
 		Log.info('Closing server.');
 		server.close();
 		knex.destroy();
+		AuthTokenInvalidateHelper.clearTimeouts();
 	};
 })().catch((err) => {
 	Log.error('Error: Server failed to start.');

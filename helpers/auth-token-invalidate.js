@@ -41,9 +41,19 @@ function invalidateUser(userId) {
 	TIMEOUTS_USERS.set(userId, tRef);
 }
 
+function clearTimeouts() {
+	for (const [sessionId, tRef] of TIMEOUTS_SESSIONS) {
+		clearTimeout(tRef);
+	}
+	for (const [userId, tRef] of TIMEOUTS_USERS) {
+		clearTimeout(tRef);
+	}
+}
+
 module.exports = {
 	ACCESS_TOKEN_MAX_AGE,
 	isValid,
 	invalidateSession,
 	invalidateUser,
+	clearTimeouts,
 };

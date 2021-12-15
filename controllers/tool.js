@@ -17,8 +17,8 @@ const Joi = require('../helpers/joi-ext');
 		ctx.throw(400, 'Only valid tool id is "BMI".');
 	}
 	let body = Joi.attempt(ctx.request.body, Joi.object().keys({
-		height: Joi.number().min(1).max(500),
-		weight: Joi.number().min(1).max(500),
+		height: Joi.number().min(1).max(500).required(),
+		weight: Joi.number().min(1).max(500).required(),
 	}));
 
 	let weight = body.weight;

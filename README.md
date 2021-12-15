@@ -14,6 +14,8 @@ cp .env.example .env
 docker-compose up -d
 ```
 
+After the `docker-compose up -d` command finishes, the server should be available on `http://127.0.0.1:23000/` and it's documentation on `http://127.0.0.1:23000/api-explorer/`. The postgres database should be running on port `35432`.
+
 All the ports listed in the `.env` file are internal to the docker containers.
 If you want to change the external ports, please modify the `docker-compose.yml` file accordingly.
 
@@ -32,7 +34,15 @@ List the node processes running in the container (command needs to be run inside
 pm2 list
 ```
 
+View the application logs with
+```bash
+pm2 logs 0
+```
 
+If for some reason you will need to rebuild the container, use the following command:
+```bash
+docker-compose build --no-cache
+```
 
 ## Development
 
@@ -44,6 +54,7 @@ System used for development
 
 Setup
 ```bash
+npm install # Install the NPM packages
 cp .env.example .env
 # Change the POSTGRES_PASSWORD in the .env file
 # Change the POSTGRES_HOST in the .env file to 127.0.0.1
@@ -67,6 +78,11 @@ nodemon index.js
 
 or debug the application with the help of the VS Code launch system (https://code.visualstudio.com/docs/editor/debugging).
 The launch commands are specified in the `.vscode/launch.json` file.
+
+Stop the database container when it is not needed anymore
+```bash
+docker-compose -f docker-compose.db.yml down
+```
 
 ## Testing
 

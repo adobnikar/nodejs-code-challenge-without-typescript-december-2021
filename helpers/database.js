@@ -60,8 +60,21 @@ async function migrateLatest() {
 	knex.destroy();
 }
 
+async function seedRun() {
+	let knex = knexConstructor(connection);
+	Log.info('DATABASE', 'Running database seeds ...');
+	let resp = await knex.seed.run();
+	if (resp[0].length > 0) {
+		Log.success('DATABASE', `Ran ${resp[0].length} seed files.`);
+	} else {
+		Log.info('DATABASE', 'No seed files exist.');
+	}
+	knex.destroy();
+}
+
 module.exports = {
 	waitForDatabase,
 	createDatabase,
 	migrateLatest,
+	seedRun,
 };

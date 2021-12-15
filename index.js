@@ -33,10 +33,8 @@ app.serverStartedPromise = new Promise((resolve, reject) => {
 // Async wrapper. Enable await calls.
 (async () => {
 	await DatabaseHelper.waitForDatabase();
-	if (process.env.AUTO_MIGRATE_DB === 'true') {
-		await DatabaseHelper.createDatabase(); // Create database if it does not exists.
-		await DatabaseHelper.migrateLatest(); // Run latest database migrations.
-	}
+	await DatabaseHelper.migrateLatest(); // Run latest database migrations.
+	await DatabaseHelper.seedRun(); // Seed the database.
 
 	// Error handler - If the error reaches the bottom of the stack.
 	app.on('error', (err) => {

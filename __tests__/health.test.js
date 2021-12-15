@@ -1,12 +1,10 @@
 const request = require('supertest');
 const app = require('../index');
 
-jest.useFakeTimers();
 beforeAll(() => {
 	return app.serverStartedPromise;
 });
 afterAll(() => {
-	//process.exit(0);
 	app.closeServer();
 });
 
